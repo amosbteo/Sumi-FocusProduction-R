@@ -5,7 +5,7 @@ output: html_document
 
 ## 1. Load Data
 ```{r}
-rm(list=ls())
+#rm(list=ls())
 SumiFoc.df1 <- read.table("data/all_broad.txt", header = TRUE)
 SumiFoc.df2 <- read.table("data/all_narrow.txt", header = TRUE)
 SumiFoc.df <- rbind(SumiFoc.df1, SumiFoc.df2)

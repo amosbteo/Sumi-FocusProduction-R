@@ -5,7 +5,7 @@ output: html_document
 
 ## 1. Load Data
 ```{r}
-rm(list=ls())
+#rm(list=ls())
 load("output/SumiFoc.RData")
 ```
 
