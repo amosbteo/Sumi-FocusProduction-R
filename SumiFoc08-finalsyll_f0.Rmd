@@ -1,0 +1,78 @@
+---
+title: "Factors influencing F0 at midpoint of syllable after =no (only 'chase' and 'sleep' predicates)"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+load("output/SumiFoc.RData")
+```
+
+## 2. Subset data for syllable after =no
+```{r}
+library(Rmisc)
+library(ggplot2)
+# Get only syllable after =no tokens
+SumiFoc.finalsyll <- subset(SumiFoc.df, Tone == "M%")
+#View(SumiFoc.finalsyll)
+SumiFoc.finalsyll.wide <- subset(SumiFoc.wide, Tone == "M%")
+#View(SumiFoc.finalsyll.wide)
+
+
+# Get f0 values at 50% point
+library(tidyr)
+SumiFoc.finalsyll50 <- subset(SumiFoc.finalsyll, Time == "50")
+SumiFoc.finalsyll50$Time <- gsub("50", "T50", SumiFoc.finalsyll50$Time)
+SumiFoc.finalsyll50.wide <- spread(SumiFoc.finalsyll50, Time, F0)
+```
+
+# 3.1. Effect of focus condition only on f0 of midpoint of syllable after =no
+```{r}
+# Compare F0s across focus conditions (collapsed for tone category)
+SumiFoc.finalsyll50.f0.summ1 <- summarySE(SumiFoc.finalsyll50.wide, "T50", groupvars = "Focus", na.rm = TRUE)
+SumiFoc.finalsyll50.f0.summ1
+
+SumiFoc.finalsyll50.f01 <- lm(T50 ~ Focus, data = SumiFoc.finalsyll50.wide)
+summary(SumiFoc.finalsyll50.f01)
+
+# Plot differences in F0 across focus conditions (collapsed for tone category)
+#plot(SumiFoc.finalsyll.wide$Focus, SumiFoc.finalsyll.wide$Dur, xlab = "Focus condition", ylab = "F0 (ms)", main = expression(paste("F0 of ", italic("=no"), " by focus condition")))
+
+SumiFoc.finalsyll50.f0.plot1 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = Focus, fill = Focus, y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of final syllable after ", italic("=no"), " by focus condition")))) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.finalsyll50.f0.plot1
+dev.copy(png, "figures/SumiFoc_finalsyll50_focus_f0.png")
+dev.off()
+```
+
+# 3.2 Effect of focus condition and predicate on F0 of midpoint of syllable after =no
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.finalsyll50.f0.summ2 <- summarySE(SumiFoc.finalsyll50.wide, "T50", groupvars = c("Focus", "Predicate"), na.rm = TRUE)
+SumiFoc.finalsyll50.f0.summ2
+
+SumiFoc.finalsyll50.f02 <- lm(T50 ~ Focus * Predicate, data = SumiFoc.finalsyll50.wide)
+summary(SumiFoc.finalsyll50.f02)
+
+# Plot differences in F0 across focus condition and predicate
+SumiFoc.finalsyll50.f0.plot2 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = Focus, fill = Predicate,  y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of final syllable after ", italic("=no"))))) +
+   scale_fill_discrete(name="Predicate",
+                         breaks=c("chase", "sleep"),
+                         labels=c("chase", "sleep")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.finalsyll50.f0.plot2
+dev.copy(png, "figures/SumiFoc_finalsyll50_focuspred_f0.png")
+dev.off()
+```
+
+## 4. Save RData
+```{r}
+save.image(file="output/SumiFoc-finalsyll50_f0.RData")
+```

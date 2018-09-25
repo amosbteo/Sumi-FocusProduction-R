@@ -1,0 +1,67 @@
+---
+title: "Preparing data to study production of focus in Sumi"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+rm(list=ls())
+SumiFoc.df1 <- read.table("data/all_broad.txt", header = TRUE)
+SumiFoc.df2 <- read.table("data/all_narrow.txt", header = TRUE)
+SumiFoc.df <- rbind(SumiFoc.df1, SumiFoc.df2)
+```
+
+## 2. Clean up data
+```{r}
+## Note missing data
+SumiFoc.df$F0 <- gsub(999, NA, SumiFoc.df$F0)
+SumiFoc.df$F0 <- as.numeric(SumiFoc.df$F0)
+
+## Create new columns in data frame
+SumiFoc.df$Time <- NULL
+colnames(SumiFoc.df)[colnames(SumiFoc.df) == "Duration"] <- "Dur"
+colnames(SumiFoc.df)[colnames(SumiFoc.df) == "Percent"] <- "Time"
+SumiFoc.df$Time <- as.integer(SumiFoc.df$Time)
+
+# Create a Focus Condition column
+SumiFoc.df$Focus <- SumiFoc.df$Label
+SumiFoc.df$Focus <- gsub("\\_.*$", "", SumiFoc.df$Focus)  # Remove everything from the first underscore '_' onwards
+SumiFoc.df$Focus<- as.factor(SumiFoc.df$Focus)
+
+# Create a Tone Condition column
+SumiFoc.df$ToneCondition <- SumiFoc.df$Label
+SumiFoc.df$ToneCondition <- gsub("^.*\\_", "", SumiFoc.df$ToneCondition)  # Remove everything up till the last underscore '_' onwards
+SumiFoc.df$ToneCondition <- gsub("[0-4]$", "", SumiFoc.df$ToneCondition)  # Remove the last number
+SumiFoc.df$ToneCondition<- as.factor(SumiFoc.df$ToneCondition)
+SumiFoc.df$ToneCondition <- factor(SumiFoc.df$ToneCondition, levels = c("H", "M", "L"))
+
+# Create a Predicate column
+SumiFoc.df$Predicate <- SumiFoc.df$Label
+SumiFoc.df$Predicate <- gsub("^(.*?)\\_", "", SumiFoc.df$Predicate) # Remove everything up till the first underscore '_' (Use ? to make this non-greedy)
+SumiFoc.df$Predicate <- gsub("\\_.*$", "", SumiFoc.df$Predicate)  # Remove everything from the first underscore '_' onwards
+SumiFoc.df$Predicate<- as.factor(SumiFoc.df$Predicate)
+SumiFoc.df$Predicate <- factor(SumiFoc.df$Predicate, levels = c("chase", "sleep", "big"))
+
+# Rename Tone column with only letters representing tonemes
+SumiFoc.df$Tone <- factor(SumiFoc.df$Tone, levels = c("T", "L", "M", "H", "%L", "%M", "L%", "M%"))
+
+# Change vowel character values
+SumiFoc.df$Vowel <- gsub("U", "ü", SumiFoc.df$Vowel)
+SumiFoc.df$Vowel <- as.factor(SumiFoc.df$Vowel)
+
+str(SumiFoc.df)
+
+# Select and re-order columns
+SumiFoc.df <- SumiFoc.df[c("Focus", "Predicate", "ToneCondition", "Label", "Word", "Vowel", "Dur", "Time", "Tone", "F0")]
+
+# Convert from long to wide format
+library(tidyr)
+SumiFoc.wide <- spread(SumiFoc.df, Time, F0)
+#View(SumiFoc.wide) # Check for labeling errors
+```
+
+
+## 3. Save RData
+```{r}
+save.image(file="output/SumiFoc.RData")
+```

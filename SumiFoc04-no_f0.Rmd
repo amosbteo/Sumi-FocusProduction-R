@@ -1,0 +1,149 @@
+---
+title: "Factors influencing F0 across =no"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+rm(list=ls())
+load("output/SumiFoc.RData")
+```
+
+## 2. Subset data for =no
+```{r}
+library(Rmisc)
+library(ggplot2)
+# Get only =no tokens
+SumiFoc.no <- subset(SumiFoc.df, Word == "no")
+#View(SumiFoc.no)
+SumiFoc.no.wide <- subset(SumiFoc.wide, Word == "no")
+#View(SumiFoc.no.wide)
+```
+
+## 3.1 Plot F0 across =no by preceding tone condition only
+```{r}
+# Get mean F0 across =no by tone category
+SumiFoc.no.tone.f0.summ <- summarySE(SumiFoc.no, measurevar = "F0", groupvars=c("ToneCondition", "Time"), na.rm=TRUE, conf.interval=0.95, .drop=TRUE)
+SumiFoc.no.tone.f0.summ
+
+# Get mean duration by tone category
+SumiFoc.no_H.dur <- subset(SumiFoc.no.wide,  ToneCondition == "H", select = c(ToneCondition, Dur))
+SumiFoc.no_M.dur <- subset(SumiFoc.no.wide,  ToneCondition == "M", select = c(ToneCondition, Dur))
+SumiFoc.no_L.dur <- subset(SumiFoc.no.wide,  ToneCondition == "L", select = c(ToneCondition, Dur))
+
+SumiFoc.no_H.dur.mean <- mean(SumiFoc.no_H.dur$Dur)
+SumiFoc.no_M.dur.mean <- mean(SumiFoc.no_M.dur$Dur)
+SumiFoc.no_L.dur.mean <- mean(SumiFoc.no_L.dur$Dur)
+
+# Add time column based on mean duration of each tone
+SumiFoc.no.tone.f0.summ$Time0 <- numeric(nrow(SumiFoc.no.tone.f0.summ))
+SumiFoc.no.tone.f0.summ$Time <- SumiFoc.no.tone.f0.summ$Time/100
+SumiFoc.no.tone.f0.summ$Time0 <-
+  ifelse(SumiFoc.no.tone.f0.summ$ToneCondition == "H", SumiFoc.no.tone.f0.summ$Time*SumiFoc.no_H.dur.mean,
+  ifelse(SumiFoc.no.tone.f0.summ$ToneCondition == "M", SumiFoc.no.tone.f0.summ$Time*SumiFoc.no_M.dur.mean,
+  ifelse(SumiFoc.no.tone.f0.summ$ToneCondition == "L", SumiFoc.no.tone.f0.summ$Time*SumiFoc.no_L.dur.mean,
+         0 )))
+View(SumiFoc.no.tone.f0.summ)
+
+# Plot f0 over =no by each preceding tone condition across time (using mean duration of each category)
+pd <- position_dodge(0.0)
+SumiFoc.no.f0.traj1 <- ggplot(SumiFoc.no.tone.f0.summ, aes(x = Time0, y = F0, colour = ToneCondition, group = ToneCondition)) + #Use x=Time for equal time
+  geom_line(aes(linetype = ToneCondition), size=1.25, position=pd) + #Line type depends on Tone.
+  geom_point(data=subset(SumiFoc.no.tone.f0.summ, (Time==0.01|Time==0.2|Time==0.4|Time==0.6|Time==0.8|Time==1)), aes(shape = ToneCondition), size = 5, position = pd) + #Only show the points for a subset of the data
+  geom_errorbar(data = subset(SumiFoc.no.tone.f0.summ, (Time==0.01|Time==0.2|Time==0.4|Time==0.6|Time==0.8|Time==1)), aes(ymin = F0-sd/2, ymax = F0+sd/2), width = 1.0, position = pd) + #Only show half the NS for a subset of the data
+  scale_x_continuous(limits = c(-0.01,0.21),
+                     breaks = c(0.00,0.05,0.10,0.15,0.20)) + # Set x range + ticks
+  scale_y_continuous(limits = c(140, 240), 
+                    breaks = c(150,175,200, 225)) + #Set y range + ticks
+  labs(x = "Time (s)", y = "F0 (Hz)", title = (expression(paste("F0 trace across", italic("=no"), ", by tone on preceding syllable")))) +
+  theme_bw() +
+  scale_colour_discrete(name = "Tone of preceding syllable",
+                        breaks = c("H", "M", "L"),
+                        labels = c("High", "Mid", "Low"), l=50) + # Use darker colors, lightness=50
+  scale_linetype_discrete(name = "Tone of preceding syllable",
+                        breaks = c("H", "M", "L"),
+                        labels = c("High", "Mid", "Low")) +  
+   scale_shape_discrete(name = "Tone of preceding syllable",
+                        breaks = c("H", "M", "L"),
+                        labels = c("High", "Mid", "Low")) +
+  theme(axis.title = element_text(size = 18),
+        axis.text = element_text(size = 17)) + #Adjust font size of axes
+  theme(legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14)) + #Adjust size of legend
+  theme(legend.justification = c(1,1),
+        legend.position = c(1,.99)) + # Set the "anchoring point" of the legend (bottom-left is 0,0; top-right is 1,1); Put top-right corner of legend box in top-right corner of graph
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.f0.traj1
+#Save as PNG file
+dev.copy(png, "figures/SumiFoc_no_tone_f0traj.png")
+dev.off()
+```
+
+
+## 3.2 Plot F0 across =no by focus condition and preceding tone condition
+```{r}
+# Get mean F0 across =no by focus * tone category
+SumiFoc.no.focustone.f0.summ <- summarySE(SumiFoc.no, measurevar = "F0", groupvars=c("Focus", "ToneCondition", "Time"), na.rm=TRUE, conf.interval=0.95, .drop=TRUE)
+
+# Get mean duration of each focus * tone category
+SumiFoc.no_broadH.dur <- subset(SumiFoc.no.wide,  (Focus == "broad" & ToneCondition == "H"),  select = c(Focus, ToneCondition, Dur))
+SumiFoc.no_narrowH.dur <- subset(SumiFoc.no.wide,  (Focus == "narrow" & ToneCondition == "H"),  select = c(Focus, ToneCondition, Dur))
+SumiFoc.no_broadM.dur <- subset(SumiFoc.no.wide,  (Focus == "broad" & ToneCondition == "M"),  select = c(Focus, ToneCondition, Dur))
+SumiFoc.no_narrowM.dur <- subset(SumiFoc.no.wide,  (Focus == "narrow" & ToneCondition == "M"),  select = c(Focus, ToneCondition, Dur))
+SumiFoc.no_broadL.dur <- subset(SumiFoc.no.wide,  (Focus == "broad" & ToneCondition == "L"),  select = c(Focus, ToneCondition, Dur))
+SumiFoc.no_narrowL.dur <- subset(SumiFoc.no.wide,  (Focus == "narrow" & ToneCondition == "L"),  select = c(Focus, ToneCondition, Dur))
+
+SumiFoc.no_broadH.dur.mean <- mean(SumiFoc.no_broadH.dur$Dur)
+SumiFoc.no_narrowH.dur.mean <- mean(SumiFoc.no_narrowH.dur$Dur)
+SumiFoc.no_broadM.dur.mean <- mean(SumiFoc.no_broadM.dur$Dur)
+SumiFoc.no_narrowM.dur.mean <- mean(SumiFoc.no_narrowM.dur$Dur)
+SumiFoc.no_broadL.dur.mean <- mean(SumiFoc.no_broadL.dur$Dur)
+SumiFoc.no_narrowL.dur.mean <- mean(SumiFoc.no_narrowL.dur$Dur)
+
+
+# Add time column based on mean duration of each tone
+SumiFoc.no.focustone.f0.summ$Time0<-numeric(nrow(SumiFoc.no.focustone.f0.summ))
+SumiFoc.no.focustone.f0.summ$Time <- SumiFoc.no.focustone.f0.summ$Time/100
+SumiFoc.no.focustone.f0.summ$Time0 <-
+  ifelse((SumiFoc.no.focustone.f0.summ$Focus == "broad" & SumiFoc.no.focustone.f0.summ$ToneCondition == "H"), SumiFoc.no.focustone.f0.summ$Time*SumiFoc.no_broadH.dur.mean,
+         ifelse((SumiFoc.no.focustone.f0.summ$Focus == "narrow" & SumiFoc.no.focustone.f0.summ$ToneCondition == "H"), SumiFoc.no.focustone.f0.summ$Time*SumiFoc.no_narrowH.dur.mean,
+                ifelse((SumiFoc.no.focustone.f0.summ$Focus == "broad" & SumiFoc.no.focustone.f0.summ$ToneCondition == "M"), SumiFoc.no.focustone.f0.summ$Time*SumiFoc.no_broadM.dur.mean,
+                       ifelse((SumiFoc.no.focustone.f0.summ$Focus == "narrow" & SumiFoc.no.focustone.f0.summ$ToneCondition == "M"), SumiFoc.no.focustone.f0.summ$Time*SumiFoc.no_narrowM.dur.mean,
+                              ifelse((SumiFoc.no.focustone.f0.summ$Focus == "broad" & SumiFoc.no.focustone.f0.summ$ToneCondition == "L"), SumiFoc.no.focustone.f0.summ$Time*SumiFoc.no_broadL.dur.mean,
+                                     ifelse((SumiFoc.no.focustone.f0.summ$Focus == "narrow" & SumiFoc.no.focustone.f0.summ$ToneCondition == "L"), SumiFoc.no.focustone.f0.summ$Time*SumiFoc.no_narrowL.dur.mean, 
+         0))))))
+#View(SumiFoc.no.focustone.f0.summ)
+
+# Plot each combination of focus and tone condition across time (using mean duration of each combination)
+pd <- position_dodge(0.1)
+SumiFoc.no.f0.traj2 <- ggplot(SumiFoc.no.focustone.f0.summ, aes(x = Time0, y = F0, colour = ToneCondition, shape = Focus, group = interaction(ToneCondition, Focus))) + #Use x=Time for equal time
+  geom_line(aes(linetype = Focus), size = 1.25, position = pd) + #Line type depends on Tone.
+  geom_point(data=subset(SumiFoc.no.focustone.f0.summ, (Time==0.01|Time==0.2|Time==0.4|Time==0.6|Time==0.8|Time==1)), aes(shape = Focus), size = 5, position = pd) + #Only show the points for a subset of the data
+  geom_errorbar(data = subset(SumiFoc.no.focustone.f0.summ, (Time==0.01|Time==0.2|Time==0.4|Time==0.6|Time==0.8|Time==1)), aes(ymin = F0-sd/2, ymax = F0+sd/2), width = 1.0, position = pd) + #Only show half the SD for a subset of the data
+  scale_x_continuous(limits = c(-0.01,0.21),
+                     breaks = c(0.00,0.05,0.10,0.15,0.20)) + # Set x range + ticks
+  scale_y_continuous(limits = c(140, 240), 
+                    breaks = c(150,175,200, 225)) + #Set y range + ticks
+  labs(x = "Time (s)", y = "F0 (Hz)", title = (expression(paste("F0 trace across", italic("=no"), ", by focus condition and tone on preceding syllable")))) +
+  theme_bw() +
+  scale_colour_discrete(name = "Tone of preceding syllable",
+                        breaks = c("H", "M", "L"),
+                        labels = c("High", "Mid", "Low"), l=50) + # Use darker colors, lightness=50
+  scale_linetype_discrete(name = "Focus condition",
+                        breaks = c("broad", "narrow"),
+                        labels = c("broad", "narrow")) +  
+   scale_shape_discrete(name = "Focus condition",
+                        breaks = c("broad", "narrow"),
+                        labels = c("broad", "narrow")) +
+  theme(axis.title = element_text(size = 18),
+        axis.text = element_text(size = 17)) + #Adjust font size of axes
+  theme(legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14)) + #Adjust size of legend
+  theme(legend.justification = c(1,1),
+        legend.position = c(1,.99)) + # Set the "anchoring point" of the legend (bottom-left is 0,0; top-right is 1,1); Put top-right corner of legend box in top-right corner of graph
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.f0.traj2
+#Save as PNG file
+dev.copy(png, "figures/SumiFoc_no_focustone_f0traj.png")
+dev.off()
+```

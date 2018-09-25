@@ -1,0 +1,103 @@
+---
+title: "Factors influencing F0 at midpoint of =no"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+rm(list=ls())
+load("output/SumiFoc.RData")
+```
+
+## 2. Subset data for =no
+```{r}
+library(Rmisc)
+library(ggplot2)
+# Get only =no tokens
+SumiFoc.no <- subset(SumiFoc.df, Word == "no")
+#View(SumiFoc.no)
+SumiFoc.no.wide <- subset(SumiFoc.wide, Word == "no")
+#View(SumiFoc.no.wide)
+
+# Get f0 values at 50% point
+library(tidyr)
+SumiFoc.no50 <- subset(SumiFoc.no, Time == "50")
+SumiFoc.no50$Time <- gsub("50", "T50", SumiFoc.no50$Time)
+SumiFoc.no50.wide <- spread(SumiFoc.no50, Time, F0)
+```
+
+# 3.1. Effect of focus condition only on f0 of =no midpoint
+```{r}
+# Compare F0s across focus conditions (collapsed for tone category)
+SumiFoc.no50.f0.summ1 <- summarySE(SumiFoc.no50.wide, "T50", groupvars = "Focus", na.rm = TRUE)
+SumiFoc.no50.f0.summ1
+
+SumiFoc.no50.f01 <- lm(T50 ~ Focus, data = SumiFoc.no50.wide)
+summary(SumiFoc.no50.f01)
+
+# Plot differences in F0 across focus conditions (collapsed for tone category)
+#plot(SumiFoc.no.wide$Focus, SumiFoc.no.wide$Dur, xlab = "Focus condition", ylab = "F0 (ms)", main = expression(paste("F0 of ", italic("=no"), " by focus condition")))
+
+library(ggplot2)
+SumiFoc.no50.f0.plot1 <- ggplot(data = SumiFoc.no50.wide, aes(x = Focus, fill = Focus, y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of ", italic("=no"), ", by focus condition")))) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no50.f0.plot1
+dev.copy(png, "figures/SumiFoc_no50_focus_f0.png")
+dev.off()
+```
+
+# 3.2 Effect of focus condition and predicate on F0 of =no midpoint
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.no50.f0.summ2 <- summarySE(SumiFoc.no50.wide, "T50", groupvars = c("Focus", "Predicate"), na.rm = TRUE)
+SumiFoc.no50.f0.summ2
+
+SumiFoc.no50.f02 <- lm(T50 ~ Focus * Predicate, data = SumiFoc.no50.wide)
+summary(SumiFoc.no50.f02)
+
+# Plot differences in F0 across focus condition and predicate
+SumiFoc.no50.f0.plot2 <- ggplot(data = SumiFoc.no50.wide, aes(x = Focus, fill = Predicate,  y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of ", italic("=no"), ", by focus condition and predicate")))) +
+   scale_fill_discrete(name="Predicate",
+                         breaks=c("chase", "sleep", "big"),
+                         labels=c("chase", "sleep", "(be) the big one")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no50.f0.plot2
+dev.copy(png, "figures/SumiFoc_no50_focuspred_f0.png")
+dev.off()
+```
+
+# 3.3 Effect of focus condition and tone category of preceding syll on F0 of =no midpoint
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.no50.f0.summ3 <- summarySE(SumiFoc.no50.wide, "T50", groupvars = c("Focus", "ToneCondition"), na.rm = TRUE)
+SumiFoc.no50.f0.summ3
+
+SumiFoc.no50.f03 <- lm(T50 ~ Focus * ToneCondition, data = SumiFoc.no50.wide)
+summary(SumiFoc.no50.f03)
+
+# Plot differences in F0 across focus condition and preceding tone category
+SumiFoc.no50.f0.plot3 <- ggplot(data = SumiFoc.no50.wide, aes(x = Focus, fill = ToneCondition,  y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of ", italic("=no"), ", by focus condition and tone category of preceding syllable")))) +
+  scale_fill_discrete(name="Tone of\npreceding syll",
+                         breaks=c("H", "M", "L"),
+                         labels=c("High", "Mid", "Low")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no50.f0.plot3
+dev.copy(png, "figures/SumiFoc_no50_focustone_f0.png")
+dev.off()
+```
+
+## 4. Save RData
+```{r}
+save.image(file="output/SumiFoc-no50_f0.RData")
+```

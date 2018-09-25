@@ -1,0 +1,97 @@
+---
+title: "Factors influencing duration of =no"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+rm(list=ls())
+load("output/SumiFoc.RData")
+```
+
+## 2. Subset data for =no
+```{r}
+library(Rmisc)
+library(ggplot2)
+# Get only =no tokens
+SumiFoc.no <- subset(SumiFoc.df, Word == "no")
+#View(SumiFoc.no)
+SumiFoc.no.wide <- subset(SumiFoc.wide, Word == "no")
+#View(SumiFoc.no.wide)
+```
+
+# 3.1. Effect of only focus condition on duration of =no
+```{r}
+# Compare durations across focus conditions (collapsed for tone category)
+SumiFoc.no.dur.summ1 <- summarySE(SumiFoc.no.wide, "Dur", groupvars = "Focus", na.rm = TRUE)
+SumiFoc.no.dur.summ1
+
+SumiFoc.no.dur1 <- lm(Dur ~ Focus, data = SumiFoc.no.wide)
+summary(SumiFoc.no.dur1)
+
+# Plot differences in duration across focus conditions (collapsed for tone category)
+#plot(SumiFoc.no.wide$Focus, SumiFoc.no.wide$Dur, xlab = "Focus condition", ylab = "Duration (ms)", main = expression(paste("Duration of ", italic("=no"), " by focus condition")))
+
+library(ggplot2)
+SumiFoc.no.dur.plot1 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Focus, y = Dur)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of ", italic("=no"), ", by focus condition")))) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.dur.plot1
+dev.copy(png, "figures/SumiFoc_no_focus_dur.png")
+dev.off()
+```
+
+# 3.2 Effect of focus condition and predicate on duration of =no
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.no.dur.summ2 <- summarySE(SumiFoc.no.wide, "Dur", groupvars = c("Focus", "Predicate"), na.rm = TRUE)
+SumiFoc.no.dur.summ2
+
+SumiFoc.no.dur2 <- lm(Dur ~ Focus * Predicate, data = SumiFoc.no.wide)
+summary(SumiFoc.no.dur2)
+
+# Plot differences in duration across focus condition and predicate
+SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Predicate,  y = Dur)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of ", italic("=no"), ", by focus condition and predicate")))) +
+   scale_fill_discrete(name="Predicate",
+                         breaks=c("chase", "sleep", "big"),
+                         labels=c("chase", "sleep", "(be) the big one")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.dur.plot2
+dev.copy(png, "figures/SumiFoc_no_focuspred_dur.png")
+dev.off()
+```
+
+# 3.3 Effect of focus condition and tone category of preceding syll on duration of =no
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.no.dur.summ3 <- summarySE(SumiFoc.no.wide, "Dur", groupvars = c("Focus", "ToneCondition"), na.rm = TRUE)
+SumiFoc.no.dur.summ3
+
+SumiFoc.no.dur3 <- lm(Dur ~ Focus * ToneCondition, data = SumiFoc.no.wide)
+summary(SumiFoc.no.dur3)
+
+# Plot differences in duration across focus condition and preceding tone category
+SumiFoc.no.dur.plot3 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = ToneCondition,  y = Dur)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of ", italic("=no"), ", by focus condition and tone category of preceding syllable")))) +
+  scale_fill_discrete(name="Tone of\npreceding syll",
+                         breaks=c("H", "M", "L"),
+                         labels=c("High", "Mid", "Low")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.dur.plot3
+dev.copy(png, "figures/SumiFoc_no_focustone_dur.png")
+dev.off()
+```
+
+## 4. Save RData
+```{r}
+save.image(file="output/SumiFoc-no_dur.RData")
+```

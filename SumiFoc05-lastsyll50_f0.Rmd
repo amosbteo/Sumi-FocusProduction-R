@@ -1,0 +1,101 @@
+---
+title: "Factors influencing F0 at midpoint of syllable before =no"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+load("output/SumiFoc.RData")
+```
+
+## 2. Subset data for syllable before =no
+```{r}
+library(Rmisc)
+library(ggplot2)
+# Get only syllable before =no tokens
+SumiFoc.tone <- subset(SumiFoc.df, Tone == "H"| Tone == "M"| Tone == "L")
+#View(SumiFoc.tone)
+SumiFoc.tone.wide <- subset(SumiFoc.wide, Tone == "H"| Tone == "M"| Tone == "L")
+#View(SumiFoc.tone.wide)
+
+# Get f0 values at 50% point
+library(tidyr)
+SumiFoc.tone50 <- subset(SumiFoc.tone, Time == "50")
+SumiFoc.tone50$Time <- gsub("50", "T50", SumiFoc.tone50$Time)
+SumiFoc.tone50.wide <- spread(SumiFoc.tone50, Time, F0)
+```
+
+# 3.1. Effect of focus condition only on f0 of midpoint of syllable before =no
+```{r}
+# Compare F0s across focus conditions (collapsed for tone category)
+SumiFoc.tone50.f0.summ1 <- summarySE(SumiFoc.tone50.wide, "T50", groupvars = "Focus", na.rm = TRUE)
+SumiFoc.tone50.f0.summ1
+
+SumiFoc.tone50.f01 <- lm(T50 ~ Focus, data = SumiFoc.tone50.wide)
+summary(SumiFoc.tone50.f01)
+
+# Plot differences in F0 across focus conditions (collapsed for tone category)
+#plot(SumiFoc.tone.wide$Focus, SumiFoc.tone.wide$Dur, xlab = "Focus condition", ylab = "F0 (ms)", main = expression(paste("F0 of ", italic("=no"), " by focus condition")))
+
+SumiFoc.tone50.f0.plot1 <- ggplot(data = SumiFoc.tone50.wide, aes(x = Focus, fill = Focus, y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of syllable before ", italic("=no"), ", by focus condition")))) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.tone50.f0.plot1
+dev.copy(png, "figures/SumiFoc_tone50_focus_f0.png")
+dev.off()
+```
+
+# 3.2 Effect of focus condition and predicate on F0 of midpoint of syllable before =no
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.tone50.f0.summ2 <- summarySE(SumiFoc.tone50.wide, "T50", groupvars = c("Focus", "Predicate"), na.rm = TRUE)
+SumiFoc.tone50.f0.summ2
+
+SumiFoc.tone50.f02 <- lm(T50 ~ Focus * Predicate, data = SumiFoc.tone50.wide)
+summary(SumiFoc.tone50.f02)
+
+# Plot differences in F0 across focus condition and predicate
+SumiFoc.tone50.f0.plot2 <- ggplot(data = SumiFoc.tone50.wide, aes(x = Focus, fill = Predicate,  y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of syllable before ", italic("=no"), ", by focus condition and predicate")))) +
+   scale_fill_discrete(name="Predicate",
+                         breaks=c("chase", "sleep", "big"),
+                         labels=c("chase", "sleep", "(be) the big one")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.tone50.f0.plot2
+dev.copy(png, "figures/SumiFoc_tone50_focuspred_f0.png")
+dev.off()
+```
+
+# 3.3 Effect of focus condition and tone category on F0 at midpoint of syllable before =no
+```{r}
+## Check for interaction with tone category of preceding word [not expected]
+# Summarize by Focus Condition & Tone Category of preceding word
+SumiFoc.tone50.f0.summ3 <- summarySE(SumiFoc.tone50.wide, "T50", groupvars = c("Focus", "ToneCondition"), na.rm = TRUE)
+SumiFoc.tone50.f0.summ3
+
+SumiFoc.tone50.f03 <- lm(T50 ~ Focus * ToneCondition, data = SumiFoc.tone50.wide)
+summary(SumiFoc.tone50.f03)
+
+# Plot differences in F0 across focus condition and preceding tone category
+SumiFoc.tone50.f0.plot3 <- ggplot(data = SumiFoc.tone50.wide, aes(x = Focus, fill = ToneCondition,  y = T50)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of syllable before ", italic("=no"), ", by focus condition and tone category")))) +
+  scale_fill_discrete(name="Tone",
+                         breaks=c("H", "M", "L"),
+                         labels=c("High", "Mid", "Low")) +
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.tone50.f0.plot3
+dev.copy(png, "figures/SumiFoc_tone50_focustone_f0.png")
+dev.off()
+```
+
+## 4. Save RData
+```{r}
+save.image(file="output/SumiFoc-lastsyll50_f0.RData")
+```
