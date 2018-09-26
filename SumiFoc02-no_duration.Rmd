@@ -38,8 +38,10 @@ SumiFoc.no.dur.plot1 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Foc
   theme_bw() +
   labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of ", italic("=no"), ", by focus condition")))) +
   theme(plot.title = element_text(hjust = 0.5))
+
+#Save as PNG file
+png(file = "figures/SumiFoc_no_focus_dur.png", width = 600, height = 450, res = 72)
 SumiFoc.no.dur.plot1
-dev.copy(png, "figures/SumiFoc_no_focus_dur.png")
 dev.off()
 ```
 
@@ -62,8 +64,10 @@ SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Pre
                          breaks=c("chase", "sleep", "big"),
                          labels=c("chase", "sleep", "(be) the big one")) +
   theme(plot.title = element_text(hjust = 0.5))
+
+#Save as PNG file
+png(file = "figures/SumiFoc_no_focuspred_dur.png", width = 600, height = 450, res = 72)
 SumiFoc.no.dur.plot2
-dev.copy(png, "figures/SumiFoc_no_focuspred_dur.png")
 dev.off()
 ```
 
@@ -87,7 +91,10 @@ SumiFoc.no.dur.plot3 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Ton
                          labels=c("High", "Mid", "Low")) +
   theme(plot.title = element_text(hjust = 0.5))
 SumiFoc.no.dur.plot3
-dev.copy(png, "figures/SumiFoc_no_focustone_dur.png")
+
+#Save as PNG file
+png(file = "figures/SumiFoc_no_focustone_dur.png", width = 600, height = 450, res = 72)
+SumiFoc.no.dur.plot3
 dev.off()
 ```
 
