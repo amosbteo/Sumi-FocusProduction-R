@@ -66,9 +66,9 @@ SumiFoc.finalsyll50.f0.plot2 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = 
 #title = (expression(paste("F0 at midpoint of final syllable after ", italic("=no")))))
   theme(axis.title = element_text(size = 16)) +
   theme(axis.text = element_text(size = 14)) +
-  scale_fill_brewer(name="Predicate",
-          breaks=c("chase", "sleep", "big"),
-          labels=c("transitive 'chase'", "intransitive 'sleep'", "verbless 'bigger (one)'"), palette="YlGnBu") +
+  scale_fill_brewer(name="Sentence type",
+          breaks=c("chase", "sleep"),
+          labels=c("transitive 'chase'", "intransitive 'sleep'"), palette="YlGnBu") +
   theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
   theme(legend.title = element_text(size = 16)) +
   theme(legend.text = element_text(size = 14)) +
