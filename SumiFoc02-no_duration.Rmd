@@ -6,13 +6,13 @@ output: html_document
 ## 1. Load Data
 ```{r}
 #rm(list=ls())
+library(Rmisc)
+library(ggplot2)
 load("output/SumiFoc.RData")
 ```
 
 ## 2. Subset data for =no
 ```{r}
-library(Rmisc)
-library(ggplot2)
 # Get only =no tokens
 SumiFoc.no <- subset(SumiFoc.df, Word == "no")
 #View(SumiFoc.no)
@@ -30,7 +30,7 @@ SumiFoc.no.dur1 <- lm(Dur ~ Focus, data = SumiFoc.no.wide)
 summary(SumiFoc.no.dur1)
 
 # Plot differences in duration across focus conditions (collapsed for tone category)
-#plot(SumiFoc.no.wide$Focus, SumiFoc.no.wide$Dur, xlab = "Focus condition", ylab = "Duration (ms)", main = expression(paste("Duration of ", italic("=no"), " by focus condition")))
+plot(SumiFoc.no.wide$Focus, SumiFoc.no.wide$Dur, xlab = "Focus condition", ylab = "Duration (ms)", main = expression(paste("Duration of ", italic("=no"), " by focus condition")))
 
 library(ggplot2)
 SumiFoc.no.dur.plot1 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Focus, y = Dur)) +
@@ -38,6 +38,7 @@ SumiFoc.no.dur.plot1 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Foc
   theme_bw() +
   labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of ", italic("=no"), ", by focus condition")))) +
   theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.dur.plot1
 
 #Save as PNG file
 png(file = "figures/SumiFoc_no_focus_dur.png", width = 600, height = 450, res = 72)
@@ -59,14 +60,21 @@ summary(SumiFoc.no.dur2)
 SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Predicate,  y = Dur)) +
   geom_boxplot() +
   theme_bw() +
-  labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of ", italic("=no"), ", by focus condition and predicate")))) +
-   scale_fill_discrete(name="Predicate",
-                         breaks=c("chase", "sleep", "big"),
-                         labels=c("chase", "sleep", "(be) the big one")) +
+  labs(x = "Focus condition", y = "Duration (s)") +
+  #labs(title = (expression(paste("Duration of ", italic("=no"), ", by focus condition and predicate")))) +
+  theme(axis.title = element_text(size = 16)) +
+  theme(axis.text = element_text(size = 14)) +
+  scale_fill_brewer(name="Predicate",
+          breaks=c("chase", "sleep", "big"),
+          labels=c("transitive 'chase'", "intransitive 'sleep'", "verbless 'bigger (one)'"), palette="YlGnBu") +
+  theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
+  theme(legend.title = element_text(size = 16)) +
+  theme(legend.text = element_text(size = 14)) +
   theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.no.dur.plot2
 
 #Save as PNG file
-png(file = "figures/SumiFoc_no_focuspred_dur.png", width = 600, height = 450, res = 72)
+png(file = "figures/SumiFoc_no_focuspred_dur.png", width = 500, height = 450, res = 72)
 SumiFoc.no.dur.plot2
 dev.off()
 ```

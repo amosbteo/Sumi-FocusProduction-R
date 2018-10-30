@@ -62,17 +62,91 @@ summary(SumiFoc.finalsyll50.f02)
 SumiFoc.finalsyll50.f0.plot2 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = Focus, fill = Predicate,  y = T50)) +
   geom_boxplot() +
   theme_bw() +
-  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of final syllable after ", italic("=no"))))) +
-   scale_fill_discrete(name="Predicate",
-                         breaks=c("chase", "sleep"),
-                         labels=c("chase", "sleep")) +
+  labs(x = "Focus condition", y = "F0 (Hz)") +
+#title = (expression(paste("F0 at midpoint of final syllable after ", italic("=no")))))
+  theme(axis.title = element_text(size = 16)) +
+  theme(axis.text = element_text(size = 14)) +
+  scale_fill_brewer(name="Predicate",
+          breaks=c("chase", "sleep", "big"),
+          labels=c("transitive 'chase'", "intransitive 'sleep'", "verbless 'bigger (one)'"), palette="YlGnBu") +
+  theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
+  theme(legend.title = element_text(size = 16)) +
+  theme(legend.text = element_text(size = 14)) +
   theme(plot.title = element_text(hjust = 0.5))
 SumiFoc.finalsyll50.f0.plot2
-dev.copy(png, "figures/SumiFoc_finalsyll50_focuspred_f0.png")
+
+#Save as PNG file
+png(file = "figures/SumiFoc_finalsyll50_focuspred_f0.png", width = 500, height = 450, res = 72)
+SumiFoc.finalsyll50.f0.plot2
 dev.off()
 ```
 
-## 4. Save RData
+## 4.1 Plot F0 across syllable before =no by focus condition and predicate type
+```{r}
+# Get mean F0 across =no by focus * predicate type
+SumiFoc.finalsyll.f0.summ <- summarySE(SumiFoc.finalsyll, measurevar = "F0", groupvars=c("Focus", "Predicate", "Time"), na.rm=TRUE, conf.interval=0.95, .drop=TRUE)
+
+# Get mean duration of each focus * predicate type
+SumiFoc.finalsyll_broadchase.dur <- subset(SumiFoc.finalsyll.wide,  (Focus == "broad" & Predicate == "chase"),  select = c(Focus, Predicate, Dur))
+SumiFoc.finalsyll_narrowchase.dur <- subset(SumiFoc.finalsyll.wide,  (Focus == "narrow" & Predicate == "chase"),  select = c(Focus, Predicate, Dur))
+SumiFoc.finalsyll_broadsleep.dur <- subset(SumiFoc.finalsyll.wide,  (Focus == "broad" & Predicate == "sleep"),  select = c(Focus, Predicate, Dur))
+SumiFoc.finalsyll_narrowsleep.dur <- subset(SumiFoc.finalsyll.wide,  (Focus == "narrow" & Predicate == "sleep"),  select = c(Focus, Predicate, Dur))
+
+SumiFoc.finalsyll_broadchase.dur.mean <- mean(SumiFoc.finalsyll_broadchase.dur$Dur)
+SumiFoc.finalsyll_narrowchase.dur.mean <- mean(SumiFoc.finalsyll_narrowchase.dur$Dur)
+SumiFoc.finalsyll_broadsleep.dur.mean <- mean(SumiFoc.finalsyll_broadsleep.dur$Dur)
+SumiFoc.finalsyll_narrowsleep.dur.mean <- mean(SumiFoc.finalsyll_narrowsleep.dur$Dur)
+
+
+# Add time column based on mean duration of each tone
+SumiFoc.finalsyll.f0.summ$Time0<-numeric(nrow(SumiFoc.finalsyll.f0.summ))
+SumiFoc.finalsyll.f0.summ$Time <- SumiFoc.finalsyll.f0.summ$Time/100
+SumiFoc.finalsyll.f0.summ$Time0 <-
+  ifelse((SumiFoc.finalsyll.f0.summ$Focus == "broad" & SumiFoc.finalsyll.f0.summ$Predicate == "chase"), SumiFoc.finalsyll.f0.summ$Time*SumiFoc.finalsyll_broadchase.dur.mean,
+         ifelse((SumiFoc.finalsyll.f0.summ$Focus == "narrow" & SumiFoc.finalsyll.f0.summ$Predicate == "chase"), SumiFoc.finalsyll.f0.summ$Time*SumiFoc.finalsyll_narrowchase.dur.mean,
+                ifelse((SumiFoc.finalsyll.f0.summ$Focus == "broad" & SumiFoc.finalsyll.f0.summ$Predicate == "sleep"), SumiFoc.finalsyll.f0.summ$Time*SumiFoc.finalsyll_broadsleep.dur.mean,
+                       ifelse((SumiFoc.finalsyll.f0.summ$Focus == "narrow" & SumiFoc.finalsyll.f0.summ$Predicate == "sleep"), SumiFoc.finalsyll.f0.summ$Time*SumiFoc.finalsyll_narrowsleep.dur.mean, 0))))
+#View(SumiFoc.finalsyll.f0.summ)
+
+# Plot each combination of focus and tone condition across time (using mean duration of each combination)
+pd <- position_dodge(0.1)
+SumiFoc.finalsyll.f0.traj2 <- ggplot(SumiFoc.finalsyll.f0.summ, aes(x = Time0, y = F0, colour = Focus, linetype = Focus, shape = Predicate, group = interaction(Focus,Predicate))) + #Use x=Time for equal time
+  geom_line(aes(linetype = Focus), size = 1.25, position = pd) + #Line type depends on focus condition
+  geom_point(data=subset(SumiFoc.finalsyll.f0.summ, (Time==0.01|Time==0.2|Time==0.4|Time==0.6|Time==0.8|Time==1)), aes(shape = Predicate), size = 5, position = pd) + #Only show the points for a subset of the data
+  geom_errorbar(data = subset(SumiFoc.finalsyll.f0.summ, (Time==0.01|Time==0.2|Time==0.4|Time==0.6|Time==0.8|Time==1)), aes(ymin = F0-sd/2, ymax = F0+sd/2), width = 1.0, position = pd) + #Only show half the SD for a subset of the data
+  scale_x_continuous(limits = c(-0.01,0.21),
+                     breaks = c(0.00,0.05,0.10,0.15,0.20)) + # Set x range + ticks
+  scale_y_continuous(limits = c(145, 185), 
+                    breaks = c(150,160,170,180)) + #Set y range + ticks
+  labs(x = "Time (s)", y = "F0 (Hz)") +
+  #labs(title = (expression(paste("F0 trace across final syllable of sentence"))) +
+  theme_bw() +
+    scale_linetype_discrete(name = "Focus condition",
+                        breaks = c("broad", "narrow"),
+                        labels = c("broad", "narrow")) +
+    scale_colour_discrete(name = "Focus condition",
+                        breaks = c("broad", "narrow"),
+                        labels = c("broad", "narrow")) + # Use darker colors, lightness=50
+   scale_shape_discrete(name = "Predicate",
+                        breaks = c("chase", "sleep"),
+                        labels = c("chase", "sleep"), l=50) + 
+  theme(axis.title = element_text(size = 18),
+        axis.text = element_text(size = 17)) + #Adjust font size of axes
+  theme(legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14)) + #Adjust size of legend
+  theme(legend.justification = c(1,1),
+        legend.position = c(1,.99)) + # Set the "anchoring point" of the legend (bottom-left is 0,0; top-right is 1,1); Put top-right corner of legend box in top-right corner of graph
+  theme(plot.title = element_text(hjust = 0.5))
+SumiFoc.finalsyll.f0.traj2
+
+#Save as PNG file
+png(file = "figures/SumiFoc_focustone_f0traj.png", width = 500, height = 450, res = 72)
+SumiFoc.finalsyll.f0.traj2
+dev.off()
+```
+
+
+## 5. Save RData
 ```{r}
 save.image(file="output/SumiFoc-finalsyll50_f0.RData")
 ```
