@@ -44,7 +44,10 @@ SumiFoc.finalsyll50.f0.plot1 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = 
   labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of final syllable after ", italic("=no"), " by focus condition")))) +
   theme(plot.title = element_text(hjust = 0.5))
 SumiFoc.finalsyll50.f0.plot1
-dev.copy(png, "figures/SumiFoc_finalsyll50_focus_f0.png")
+
+#Save as PNG file
+png(file = "figures/SumiFoc_finalsyll50_focus_f0.png", width = 500, height = 450, res = 72)
+SumiFoc.finalsyll50.f0.plot1
 dev.off()
 ```
 
@@ -68,7 +71,7 @@ SumiFoc.finalsyll50.f0.plot2 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = 
   theme(axis.text = element_text(size = 14)) +
   scale_fill_brewer(name="Sentence type",
           breaks=c("chase", "sleep"),
-          labels=c("transitive 'chase'", "intransitive 'sleep'"), palette="YlGnBu") +
+          labels=c("transitive 'chase'", "intransitive 'sleep'"), palette="Greys") +
   theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
   theme(legend.title = element_text(size = 16)) +
   theme(legend.text = element_text(size = 14)) +
@@ -76,7 +79,7 @@ SumiFoc.finalsyll50.f0.plot2 <- ggplot(data = SumiFoc.finalsyll50.wide, aes(x = 
 SumiFoc.finalsyll50.f0.plot2
 
 #Save as PNG file
-png(file = "figures/SumiFoc_finalsyll50_focuspred_f0.png", width = 500, height = 450, res = 72)
+png(file = "figures/SumiFoc_finalsyll50_focuspred_f0-bw.png", width = 500, height = 450, res = 72)
 SumiFoc.finalsyll50.f0.plot2
 dev.off()
 ```
