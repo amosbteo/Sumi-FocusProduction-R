@@ -92,7 +92,7 @@ SumiFoc.no50.f0.plot3 <- ggplot(data = SumiFoc.no50.wide, aes(x = Focus, fill = 
     labs(x = "Focus condition", y = "F0 (Hz)") +
   theme(axis.title = element_text(size = 16)) +
   theme(axis.text = element_text(size = 14)) +
-    scale_fill_brewer(name="Tone of\npreceding syll",
+    scale_fill_brewer(name="Tone of\npreceding syllable",
                          breaks=c("H", "M", "L"),
                          labels=c("High", "Mid", "Low"),
                         palette="Set1") +

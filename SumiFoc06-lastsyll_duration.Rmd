@@ -50,20 +50,30 @@ dev.off()
 SumiFoc.tone.dur.summ2 <- summarySE(SumiFoc.tone.wide, "Dur", groupvars = c("Focus", "Predicate"), na.rm = TRUE)
 SumiFoc.tone.dur.summ2
 
-SumiFoc.tone.dur2 <- lm(Dur ~ Focus * Predicate, data = SumiFoc.tone.wide)
+SumiFoc.tone.dur2 <- aov(Dur ~ Focus * Predicate, data = SumiFoc.tone.wide)
 summary(SumiFoc.tone.dur2)
 
 # Plot differences in duration across focus condition and predicate
 SumiFoc.tone.dur.plot2 <- ggplot(data = SumiFoc.tone.wide, aes(x = Focus, fill = Predicate,  y = Dur)) +
   geom_boxplot() +
   theme_bw() +
-  labs(x = "Focus condition", y = "Duration (s)", title = (expression(paste("Duration of syllable preceding ", italic("=no"), ", by focus condition and predicate")))) +
-   scale_fill_discrete(name="Predicate",
-                         breaks=c("chase", "sleep", "big"),
-                         labels=c("chase", "sleep", "(be) the big one")) +
+  labs(x = "Focus condition", y = "Duration (s)") + #title = (expression(paste("Duration of syllable preceding ", italic("=no"), ", by focus condition and predicate")))) +
+  theme(axis.title = element_text(size = 16)) +
+  theme(axis.text = element_text(size = 14)) +
+  ylim(0, 0.20) +
+    scale_fill_brewer(name="Sentence type",
+          breaks=c("chase", "sleep", "big"),
+          labels=c("transitive 'chase'", "intransitive 'sleep'", "verbless 'bigger'"),
+          palette="Set2") +
+  theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
+  theme(legend.title = element_text(size = 16)) +
+  theme(legend.text = element_text(size = 14)) +
   theme(plot.title = element_text(hjust = 0.5))
 SumiFoc.tone.dur.plot2
-dev.copy(png, "figures/SumiFoc_lastsyll_focuspred_dur.png")
+
+#Save as PNG file
+png(file = "figures/SumiFoc_no50_focustone_f0-color.png", width = 500, height = 450, res = 72)
+SumiFoc.tone.dur.plot2
 dev.off()
 ```
 
@@ -89,6 +99,7 @@ SumiFoc.tone.dur.plot3 <- ggplot(data = SumiFoc.tone.wide, aes(x = Focus, fill =
 SumiFoc.tone.dur.plot3
 dev.copy(png, "figures/SumiFoc_lastsyll_focustone_dur.png")
 dev.off()
+
 ```
 
 ## 4. Save RData

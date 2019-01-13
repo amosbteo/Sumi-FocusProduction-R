@@ -70,7 +70,7 @@ SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Pre
     scale_fill_brewer(name="Sentence type",
           breaks=c("chase", "sleep", "big"),
           labels=c("transitive 'chase'", "intransitive 'sleep'", "verbless 'bigger'"),
-          palette="Set1") +
+          palette="Set2") +
   theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
   theme(legend.title = element_text(size = 16)) +
   theme(legend.text = element_text(size = 14)) +
