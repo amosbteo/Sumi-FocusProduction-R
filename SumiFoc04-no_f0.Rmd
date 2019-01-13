@@ -124,11 +124,12 @@ SumiFoc.no.f0.traj2 <- ggplot(SumiFoc.no.focustone.f0.summ, aes(x = Time0, y = F
                      breaks = c(0.00,0.05,0.10,0.15,0.20)) + # Set x range + ticks
   scale_y_continuous(limits = c(140, 240), 
                     breaks = c(150,175,200, 225)) + #Set y range + ticks
-  labs(x = "Time (s)", y = "F0 (Hz)", title = (expression(paste("F0 trace across", italic("=no"), ", by focus condition and tone on preceding syllable")))) +
+  labs(x = "Time (s)", y = "F0 (Hz)") + #title = (expression(paste("F0 trace across", italic("=no"), ", by focus condition and tone on preceding syllable")))) +
   theme_bw() +
-  scale_colour_discrete(name = "Tone of preceding syllable",
+  scale_colour_brewer(name = "Tone of preceding syllable",
                         breaks = c("H", "M", "L"),
-                        labels = c("High", "Mid", "Low"), l=50) + # Use darker colors, lightness=50
+                        labels = c("High", "Mid", "Low"),
+                        palette = "Set1") + # (l = 50) Use darker colors, lightness=50
   scale_linetype_discrete(name = "Focus condition",
                         breaks = c("broad", "narrow"),
                         labels = c("broad", "narrow")) +  
@@ -143,7 +144,9 @@ SumiFoc.no.f0.traj2 <- ggplot(SumiFoc.no.focustone.f0.summ, aes(x = Time0, y = F
         legend.position = c(1,.99)) + # Set the "anchoring point" of the legend (bottom-left is 0,0; top-right is 1,1); Put top-right corner of legend box in top-right corner of graph
   theme(plot.title = element_text(hjust = 0.5))
 SumiFoc.no.f0.traj2
+
 #Save as PNG file
-dev.copy(png, "figures/SumiFoc_no_focustone_f0traj.png")
+png(file = "figures/SumiFoc_no_focustone_f0traj-color.png", width = 500, height = 450, res = 72)
+SumiFoc.no.f0.traj2
 dev.off()
 ```

@@ -55,6 +55,9 @@ SumiFoc.no.dur.summ2
 
 SumiFoc.no.dur2 <- lm(Dur ~ Focus * Predicate, data = SumiFoc.no.wide)
 summary(SumiFoc.no.dur2)
+SumiFoc.no.dur2.aov <- aov(Dur ~ Focus * Predicate, data = SumiFoc.no.wide)
+summary(SumiFoc.no.dur2.aov)
+
 
 # Plot differences in duration across focus condition and predicate
 SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Predicate,  y = Dur)) +
@@ -67,7 +70,7 @@ SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Pre
     scale_fill_brewer(name="Sentence type",
           breaks=c("chase", "sleep", "big"),
           labels=c("transitive 'chase'", "intransitive 'sleep'", "verbless 'bigger'"),
-          palette="Greys") +
+          palette="Set1") +
   theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
   theme(legend.title = element_text(size = 16)) +
   theme(legend.text = element_text(size = 14)) +
@@ -75,7 +78,7 @@ SumiFoc.no.dur.plot2 <- ggplot(data = SumiFoc.no.wide, aes(x = Focus, fill = Pre
 SumiFoc.no.dur.plot2
 
 #Save as PNG file
-png(file = "figures/SumiFoc_no_focuspred_dur-bw.png", width = 500, height = 450, res = 72)
+png(file = "figures/SumiFoc_no_focuspred_dur-color.png", width = 500, height = 450, res = 72)
 SumiFoc.no.dur.plot2
 dev.off()
 ```

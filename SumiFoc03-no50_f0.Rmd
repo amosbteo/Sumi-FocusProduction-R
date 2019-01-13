@@ -80,20 +80,31 @@ dev.off()
 SumiFoc.no50.f0.summ3 <- summarySE(SumiFoc.no50.wide, "T50", groupvars = c("Focus", "ToneCondition"), na.rm = TRUE)
 SumiFoc.no50.f0.summ3
 
-SumiFoc.no50.f03 <- lm(T50 ~ Focus * ToneCondition, data = SumiFoc.no50.wide)
+SumiFoc.no50.f03 <- aov(T50 ~ Focus * ToneCondition, data = SumiFoc.no50.wide)
 summary(SumiFoc.no50.f03)
+TukeyHSD(SumiFoc.no50.f03)
+
 
 # Plot differences in F0 across focus condition and preceding tone category
 SumiFoc.no50.f0.plot3 <- ggplot(data = SumiFoc.no50.wide, aes(x = Focus, fill = ToneCondition,  y = T50)) +
   geom_boxplot() +
   theme_bw() +
-  labs(x = "Focus condition", y = "F0 (Hz)", title = (expression(paste("F0 at midpoint of ", italic("=no"), ", by focus condition and tone category of preceding syllable")))) +
-  scale_fill_discrete(name="Tone of\npreceding syll",
+    labs(x = "Focus condition", y = "F0 (Hz)") +
+  theme(axis.title = element_text(size = 16)) +
+  theme(axis.text = element_text(size = 14)) +
+    scale_fill_brewer(name="Tone of\npreceding syll",
                          breaks=c("H", "M", "L"),
-                         labels=c("High", "Mid", "Low")) +
+                         labels=c("High", "Mid", "Low"),
+                        palette="Set1") +
+  theme(legend.justification = c(1,0.99), legend.position = c(1,0.99)) +
+  theme(legend.title = element_text(size = 16)) +
+  theme(legend.text = element_text(size = 14)) +
   theme(plot.title = element_text(hjust = 0.5))
 SumiFoc.no50.f0.plot3
-dev.copy(png, "figures/SumiFoc_no50_focustone_f0.png")
+
+#Save as PNG file
+png(file = "figures/SumiFoc_no50_focustone_f0-color.png", width = 500, height = 450, res = 72)
+SumiFoc.no50.f0.plot3
 dev.off()
 ```
 
